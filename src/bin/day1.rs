@@ -17,11 +17,10 @@ fn parse(input: &String) -> String {
     let mut dial = 50;
     let mut counter = 0;
     for line in lines {
-        dial = turn(dial, interpret(line));
+        let (new_dial, corssings) = turn(dial, interpret(line));
+        dial = new_dial;
 
-        if dial == 0 {
-            counter += 1;
-        }
+        counter += crossings;
     }
 
     return counter.to_string();
@@ -39,10 +38,31 @@ fn interpret(input: &str) -> i32 {
     return 0;
 }
 
-fn turn(dial: i32, amount: i32) -> i32 {
-    let raw = dial + amount;
+fn turn(dial: i32, amount: i32) -> (i32, i32) {
+    if amount == 0 {
+        return (dial, 0);
+    }
 
-    let result = ((raw % 100) + 100) % 100;
+    let mut crossings = 0;
+    let mut current = dial;
 
-    result
+    let step = if amount > 0 { 1 } else { -1 };
+
+    for _ in 0..amount.abs() {
+        current += step;
+
+        // wrap around
+        if current == 100 {
+            current = 0;
+        } else if current == -1 {
+            current = 99;
+        }
+
+        // count hitting 0
+        if current == 0 {
+            crossings += 1;
+        }
+    }
+
+    (current, crossings)
 }
