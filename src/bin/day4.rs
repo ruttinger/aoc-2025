@@ -12,7 +12,7 @@ fn main() {
 }
 
 fn parse(input: &str) -> u32 {
-    let mut paper_rolls = 0;
+    let mut rm_paper_rolls = 0;
 
     let mut grid: Vec<Vec<u32>> = input
         .lines()
@@ -22,7 +22,7 @@ fn parse(input: &str) -> u32 {
                 .map(|c| match c {
                     '@' => 1,
                     '.' => 0,
-                    _   => panic!("unexpected char {}", c),
+                    _ => panic!("unexpected char {}", c),
                 })
                 .collect();
 
@@ -38,16 +38,42 @@ fn parse(input: &str) -> u32 {
     grid.insert(0, pad.clone());
     grid.push(pad);
 
-    for i in 1..grid.len() - 1 {
-        for j in 1..grid[i].len() - 1 {
+    let mut paper_rolls = 1;
+    while paper_rolls != 0 {
+        paper_rolls = interpret(&mut grid);
+        rm_paper_rolls += paper_rolls;
+    }
+
+    rm_paper_rolls
+}
+
+fn interpret(grid: &mut Vec<Vec<u32>>) -> u32 {
+    let mut paper_rolls = 0;
+    let rows = grid.len();
+    let cols = grid[0].len();
+
+    let mut to_remove = vec![vec![false; cols]; rows];
+
+    for i in 1..rows - 1 {
+        for j in 1..cols - 1 {
             if grid[i][j] == 1 {
                 let rolls =
-                    grid[i - 1][j - 1] + grid[i - 1][j] + grid[i - 1][j + 1] + grid[i][j - 1] +
-                    grid[i][j + 1] + grid[i + 1][j - 1] + grid[i + 1][j] + grid[i + 1][j + 1];
+                    grid[i - 1][j - 1] + grid[i - 1][j] + grid[i - 1][j + 1] +
+                    grid[i][j - 1]                 + grid[i][j + 1] +
+                    grid[i + 1][j - 1] + grid[i + 1][j] + grid[i + 1][j + 1];
 
                 if rolls < 4 {
-                    paper_rolls += 1;
+                    to_remove[i][j] = true;
                 }
+            }
+        }
+    }
+
+    for i in 0..rows {
+        for j in 0..cols {
+            if to_remove[i][j] {
+                grid[i][j] = 0;
+                paper_rolls += 1;
             }
         }
     }
