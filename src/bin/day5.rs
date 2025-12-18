@@ -1,5 +1,6 @@
 use std::io;
 use std::io::Read;
+use std::cmp;
 
 fn main() {
     let mut input = String::new();
@@ -12,24 +13,36 @@ fn main() {
 }
 
 fn parse(input: &str) -> u64 {
-    let (first, second) = input.split_once("\n\n").unwrap();
-
     let mut ranges = Vec::new();
+
+    let (first, _) = input.split_once("\n\n").unwrap();
+
     for line in first.lines() {
         let (q, r) = line.split_once("-").unwrap();
         let k = q.parse::<u64>().unwrap();
         let n = r.parse::<u64>().unwrap();
-        ranges.push((k, n))
+        ranges.push((k, n));
     }
 
-    let mut fresh = 0;
+    ranges.sort_unstable_by_key(|r| (r.0, r.1));
 
-    for line in second.lines() {
-        let x = line.parse::<u64>().unwrap();
-        if ranges.iter().any(|&(k, n)| k <= x && x <= n) {
-            fresh += 1;
+    let mut merged: Vec<(u64, u64)> = Vec::new();
+
+    let mut current = ranges[0];
+
+    for &(start, end) in &ranges[1..] {
+        if start <= current.1 {
+            current.1 = cmp::max(current.1, end);
+        } else {
+            merged.push(current);
+            current = (start, end);
         }
     }
+    merged.push(current);
 
-    fresh
+    merged
+        .iter()
+        .map(|(s, e)| e - s+1)
+        .sum()
+
 }
