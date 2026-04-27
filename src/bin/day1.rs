@@ -17,7 +17,7 @@ fn parse(input: &String) -> String {
     let mut dial = 50;
     let mut counter = 0;
     for line in lines {
-        let (new_dial, corssings) = turn(dial, interpret(line));
+        let (new_dial, crossings) = turn(dial, interpret(line));
         dial = new_dial;
 
         counter += crossings;
